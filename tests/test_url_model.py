@@ -9,7 +9,7 @@ import pytest
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
-from url_features import LEXICAL_FEATURES, explain, lexical_vector, normalize_url  # noqa: E402
+from url_features import LEXICAL_FEATURES, explain, lexical_vector, normalize_url, unwrap  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -22,6 +22,11 @@ def model():
 def phish_prob(model, url):
     m, v = model
     return float(m.predict_proba(v.transform([url]))[0, 1])
+
+
+def is_phish(model, url):
+    m, v = model
+    return bool(m.predict(v.transform([url]))[0] == 1)
 
 
 def test_normalize_strips_scheme_and_lowercases_host():
@@ -45,7 +50,7 @@ def test_lexical_vector_shape_and_signals():
     "https://docs.python.org/3/tutorial/",
 ])
 def test_legitimate_urls(model, url):
-    assert phish_prob(model, url) < 0.5
+    assert not is_phish(model, url)
 
 
 @pytest.mark.parametrize("url", [
@@ -55,13 +60,19 @@ def test_legitimate_urls(model, url):
     "http://github.com.login-session.top/verify",
 ])
 def test_phishing_urls(model, url):
-    assert phish_prob(model, url) > 0.5
+    assert is_phish(model, url)
 
 
 def test_scheme_does_not_change_verdict(model):
     """v1 bug: adding https:// changed the prediction. v2 normalises it away."""
     for u in ["www.google.com/", "paypal-secure-login.verify-account.tk/webscr"]:
         assert abs(phish_prob(model, u) - phish_prob(model, "https://" + u)) < 1e-6
+
+
+def test_threshold_is_calibrated(model):
+    m, _ = model
+    _, thr = unwrap(m)
+    assert 0.3 <= thr <= 0.95
 
 
 def test_explanation_is_exact_for_linear_model(model):
@@ -76,6 +87,8 @@ def test_explanation_is_exact_for_linear_model(model):
 def test_evaluation_results_recorded():
     with open(os.path.join(ROOT, "models", "evaluation_results.json")) as fh:
         r = json.load(fh)
-    assert r["model_version"] == "2.0"
-    assert r["accuracy"] > 0.97 and r["roc_auc"] > 0.99
+    assert r["model_version"] == "3.0"
+    assert r["roc_auc"] > 0.99
+    fresh = r["fresh_2026_unseen_websites"]
+    assert fresh["roc_auc"] > 0.98 and fresh["false_positive_rate"] < 0.05
     assert all(s["correct"] for s in r["sanity_checks"])

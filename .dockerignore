@@ -1,0 +1,10 @@
+.git
+venv
+__pycache__
+*.pyc
+.pytest_cache
+chrome_extension
+docs
+training/intel
+training/phishing_site_urls.csv
+models/email/*.safetensors

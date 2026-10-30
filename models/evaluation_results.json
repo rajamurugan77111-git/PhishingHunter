@@ -1,44 +1,110 @@
 {
-  "accuracy": 0.9856,
-  "precision": 0.9823,
-  "recall": 0.9534,
-  "f1": 0.9677,
-  "roc_auc": 0.9975,
+  "accuracy": 0.9708,
+  "precision": 0.9967,
+  "recall": 0.8733,
+  "f1": 0.9309,
+  "roc_auc": 0.9972,
+  "false_positive_rate": 0.0008,
   "confusion_matrix": [
     [
-      78188,
-      392
+      78514,
+      66
     ],
     [
-      1065,
-      21792
+      2897,
+      19960
     ]
   ],
+  "samples": 101437,
+  "fresh_2026_unseen_websites": {
+    "accuracy": 0.9331,
+    "precision": 0.9915,
+    "recall": 0.9237,
+    "f1": 0.9564,
+    "roc_auc": 0.9913,
+    "false_positive_rate": 0.0306,
+    "confusion_matrix": [
+      [
+        8581,
+        271
+      ],
+      [
+        2597,
+        31437
+      ]
+    ],
+    "samples": 42886
+  },
+  "previous_model_on_same_tests": {
+    "previous_model_dir": "/home/claude/v2_models",
+    "kaggle_holdout": {
+      "accuracy": 0.9856,
+      "precision": 0.9823,
+      "recall": 0.9534,
+      "f1": 0.9677,
+      "roc_auc": 0.9975,
+      "false_positive_rate": 0.005,
+      "confusion_matrix": [
+        [
+          78188,
+          392
+        ],
+        [
+          1065,
+          21792
+        ]
+      ],
+      "samples": 101437
+    },
+    "fresh_2026_unseen_websites": {
+      "accuracy": 0.865,
+      "precision": 0.9453,
+      "recall": 0.8809,
+      "f1": 0.912,
+      "roc_auc": 0.9213,
+      "false_positive_rate": 0.196,
+      "confusion_matrix": [
+        [
+          7117,
+          1735
+        ],
+        [
+          4053,
+          29981
+        ]
+      ],
+      "samples": 42886
+    }
+  },
   "model_type": "LogisticRegression",
-  "model_version": "2.0",
+  "model_version": "3.0",
+  "decision_threshold": 0.92,
   "features": "URLFeaturizer: char 1-5 grams + word 1-2 grams + 25 lexical features",
   "n_features": 450025,
   "sklearn_version": "1.8.0",
-  "training_timestamp": "2026-10-30T07:04:40.372532+00:00",
+  "training_timestamp": "2026-10-30T07:51:23.480091+00:00",
   "dataset": {
     "raw_rows": 549346,
     "unique_urls": 507184,
-    "train_rows": 406306,
+    "train_rows": 541146,
     "test_rows": 101437,
     "augmented_legitimate_urls": 559,
+    "threat_intel_train": 151469,
+    "threat_intel_test": 42886,
+    "threat_intel_split": "by registered domain (unseen websites), 80/20",
     "split": "stratified 80/20 after de-duplication, seed 42"
   },
   "sanity_checks": [
     {
       "url": "https://www.google.com/",
       "expected": "legitimate",
-      "phishing_probability": 0.001,
+      "phishing_probability": 0.0,
       "correct": true
     },
     {
       "url": "https://github.com/login/oauth/authorize?client_id=abc123",
       "expected": "legitimate",
-      "phishing_probability": 0.19,
+      "phishing_probability": 0.455,
       "correct": true
     },
     {
@@ -50,37 +116,37 @@
     {
       "url": "https://mail.google.com/mail/u/1/#sent",
       "expected": "legitimate",
-      "phishing_probability": 0.066,
+      "phishing_probability": 0.027,
       "correct": true
     },
     {
       "url": "https://outlook.live.com/mail/0/",
       "expected": "legitimate",
-      "phishing_probability": 0.089,
+      "phishing_probability": 0.039,
       "correct": true
     },
     {
       "url": "https://www.linkedin.com/checkpoint/lg/sign-in",
       "expected": "legitimate",
-      "phishing_probability": 0.008,
+      "phishing_probability": 0.207,
       "correct": true
     },
     {
       "url": "https://www.amazon.in/gp/cart/view.html",
       "expected": "legitimate",
-      "phishing_probability": 0.0,
+      "phishing_probability": 0.002,
       "correct": true
     },
     {
       "url": "https://stackoverflow.com/questions",
       "expected": "legitimate",
-      "phishing_probability": 0.001,
+      "phishing_probability": 0.0,
       "correct": true
     },
     {
       "url": "https://www.kongu.ac.in/",
       "expected": "legitimate",
-      "phishing_probability": 0.015,
+      "phishing_probability": 0.089,
       "correct": true
     },
     {
@@ -128,168 +194,168 @@
   ],
   "top_phishing_indicators": [
     {
-      "feature": "char:q",
-      "weight": 14.45
+      "feature": "char:/i",
+      "weight": 16.614
     },
     {
-      "feature": "char:x",
-      "weight": 13.233
-    },
-    {
-      "feature": "lex:suspicious_words",
-      "weight": 13.087
-    },
-    {
-      "feature": "lex:host_length",
-      "weight": 12.44
-    },
-    {
-      "feature": "char:z",
-      "weight": 12.099
-    },
-    {
-      "feature": "lex:n_hyphens_host",
-      "weight": 10.706
-    },
-    {
-      "feature": "word:exe",
-      "weight": 10.463
+      "feature": "char:/a",
+      "weight": 16.292
     },
     {
       "feature": "char:/.",
-      "weight": 10.34
-    },
-    {
-      "feature": "char:j",
-      "weight": 10.105
-    },
-    {
-      "feature": "char:v",
-      "weight": 10.055
-    },
-    {
-      "feature": "word:js",
-      "weight": 9.996
-    },
-    {
-      "feature": "char:/i",
-      "weight": 9.791
-    },
-    {
-      "feature": "char:p",
-      "weight": 9.601
-    },
-    {
-      "feature": "lex:n_digits_ratio",
-      "weight": 8.712
-    },
-    {
-      "feature": "char:/u",
-      "weight": 8.582
+      "weight": 15.511
     },
     {
       "feature": "char:/w",
-      "weight": 8.493
+      "weight": 15.061
     },
     {
-      "feature": "char:g",
-      "weight": 8.483
+      "feature": "char:q",
+      "weight": 14.83
     },
     {
-      "feature": "char:f",
-      "weight": 8.306
+      "feature": "lex:n_hyphens_host",
+      "weight": 14.692
     },
     {
-      "feature": "char: ",
-      "weight": 8.219
+      "feature": "char:/o",
+      "weight": 14.553
     },
     {
-      "feature": "char:b",
-      "weight": 8.186
+      "feature": "char:/u",
+      "weight": 13.846
+    },
+    {
+      "feature": "char:x",
+      "weight": 13.617
+    },
+    {
+      "feature": "lex:host_length",
+      "weight": 13.418
+    },
+    {
+      "feature": "char:/b",
+      "weight": 13.184
+    },
+    {
+      "feature": "char:/d",
+      "weight": 12.931
+    },
+    {
+      "feature": "char:/l",
+      "weight": 12.907
+    },
+    {
+      "feature": "char:/s",
+      "weight": 12.606
+    },
+    {
+      "feature": "char:/c",
+      "weight": 12.036
+    },
+    {
+      "feature": "char:z",
+      "weight": 11.884
+    },
+    {
+      "feature": "char:/n",
+      "weight": 11.677
+    },
+    {
+      "feature": "lex:suspicious_words",
+      "weight": 11.656
+    },
+    {
+      "feature": "char:/h",
+      "weight": 11.642
+    },
+    {
+      "feature": "char:v",
+      "weight": 11.516
     }
   ],
   "top_legitimate_indicators": [
     {
-      "feature": "char:-",
-      "weight": -14.627
+      "feature": "char:/",
+      "weight": -50.566
     },
     {
       "feature": "char:.com/",
-      "weight": -14.606
+      "weight": -33.607
     },
     {
       "feature": "char:com/",
-      "weight": -14.509
+      "weight": -33.164
     },
     {
       "feature": "char:om/",
-      "weight": -14.433
-    },
-    {
-      "feature": "char:/",
-      "weight": -14.042
-    },
-    {
-      "feature": "char:_",
-      "weight": -13.621
+      "weight": -32.891
     },
     {
       "feature": "char:m/",
-      "weight": -13.376
+      "weight": -30.623
+    },
+    {
+      "feature": "char:_",
+      "weight": -16.552
     },
     {
       "feature": "char:+",
-      "weight": -12.6
+      "weight": -13.402
+    },
+    {
+      "feature": "char:.net/",
+      "weight": -11.385
+    },
+    {
+      "feature": "char:s/",
+      "weight": -10.528
+    },
+    {
+      "feature": "char:org/",
+      "weight": -10.365
+    },
+    {
+      "feature": "char:.org/",
+      "weight": -10.307
+    },
+    {
+      "feature": "char:.cn/",
+      "weight": -10.143
+    },
+    {
+      "feature": "char:rg/",
+      "weight": -9.955
+    },
+    {
+      "feature": "char:net/",
+      "weight": -9.92
     },
     {
       "feature": "char:=",
-      "weight": -8.669
+      "weight": -9.852
     },
     {
-      "feature": "char:00",
-      "weight": -7.646
+      "feature": "char:-",
+      "weight": -9.828
     },
     {
-      "feature": "lex:n_dots_host",
-      "weight": -7.225
+      "feature": "char:g/",
+      "weight": -9.779
     },
     {
-      "feature": "char:19",
-      "weight": -7.211
-    },
-    {
-      "feature": "word:cfm",
-      "weight": -7.148
-    },
-    {
-      "feature": "char:200",
-      "weight": -7.101
-    },
-    {
-      "feature": "word:www angelfire",
-      "weight": -7.028
+      "feature": "char:cn/",
+      "weight": -9.556
     },
     {
       "feature": "char:htm",
-      "weight": -7.022
+      "weight": -9.409
     },
     {
-      "feature": "lex:reputable_domain",
-      "weight": -6.613
-    },
-    {
-      "feature": "char:.php?",
-      "weight": -6.293
-    },
-    {
-      "feature": "char:ww",
-      "weight": -6.229
-    },
-    {
-      "feature": "char:qu",
-      "weight": -6.121
+      "feature": "char:.de/",
+      "weight": -9.183
     }
   ],
   "compatible": true,
-  "train_seconds": 535.1
+  "train_seconds": 770.6
 }

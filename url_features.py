@@ -187,6 +187,14 @@ class URLFeaturizer(BaseEstimator, TransformerMixin):
                 [f"lex:{n}" for n in LEXICAL_FEATURES])
 
 
+def unwrap(model):
+    """Return (inner_estimator, decision_threshold) for a possibly thresholded model."""
+    from sklearn.model_selection import FixedThresholdClassifier
+    if isinstance(model, FixedThresholdClassifier):
+        return model.estimator_, float(model.threshold)
+    return model, 0.5
+
+
 def explain(url: str, model, featurizer: "URLFeaturizer", top: int = 8) -> dict:
     """Explain one prediction of the linear URL model.
 
@@ -194,12 +202,13 @@ def explain(url: str, model, featurizer: "URLFeaturizer", top: int = 8) -> dict:
     so each feature's contribution is exact (not an approximation like LIME).
     """
     x = featurizer.transform([url]).tocsr()
-    coef = model.coef_[0]
+    est, threshold = unwrap(model)
+    coef = est.coef_[0]
     idx = x.indices
     contrib = x.data * coef[idx]
     names = featurizer.feature_names()
     order = np.argsort(contrib)
-    proba = float(model.predict_proba(x)[0, 1])
+    proba = float(est.predict_proba(x)[0, 1])
 
     def fmt(i):
         return {"feature": names[idx[i]], "contribution": round(float(contrib[i]), 3)}
@@ -208,8 +217,9 @@ def explain(url: str, model, featurizer: "URLFeaturizer", top: int = 8) -> dict:
         "url": url,
         "normalized": normalize_url(url),
         "phishing_probability": round(proba, 4),
-        "prediction": "phishing" if proba >= 0.5 else "legitimate",
-        "bias": round(float(model.intercept_[0]), 3),
+        "prediction": "phishing" if proba >= threshold else "legitimate",
+        "decision_threshold": threshold,
+        "bias": round(float(est.intercept_[0]), 3),
         "toward_phishing": [fmt(i) for i in order[::-1][:top] if contrib[i] > 0],
         "toward_legitimate": [fmt(i) for i in order[:top] if contrib[i] < 0],
         "lexical": dict(zip(LEXICAL_FEATURES, lexical_vector(url))),

@@ -11,41 +11,40 @@ classifier.
 
 ---
 
-## What's new in v2: explainable AI and a stronger URL model
+## What's new in v4: a threat-intel-trained, explainable URL model
 
-| | v1 | **v2** |
-|---|---|---|
-| Model | Random forest on char 3-4 grams | **Logistic regression on 450k features**: char 1-5 grams, word 1-2 grams, 25 lexical features |
-| Accuracy (held-out) | 89.4%* | **98.56%** |
-| F1 (phishing class) | 0.724* | **0.968** |
-| ROC-AUC | 0.930* | **0.9975** |
-| Real-world sanity checks | google.com flagged at 52%; github.com/login at 84% | **16 / 16 correct** |
-| Explanations | none | **Exact per-feature contributions** via `/explain_url` and in the popup |
-| Model size | 7.7 MB | 7.9 MB |
+The URL model is evaluated where it matters: on **currently active 2026 phishing**, from
+**websites it has never seen** (split by registered domain). See
+[docs/EVALUATION.md](docs/EVALUATION.md) for the full report.
 
-\* The v1 model was measured on the same v2 test URLs. Its training split may have overlapped
-those URLs, so the true v1 numbers are likely *lower* than shown.
+| Model | Accuracy | Precision | Recall | ROC-AUC | False alarms on legit sites |
+|---|---|---|---|---|---|
+| v1 (original random forest) | 54.8% | 87.7% | 50.0% | 0.708 | 27.0% |
+| v2 (better features) | 86.5% | 94.5% | 88.1% | 0.921 | 19.6% |
+| **v4 (deployed)** | **93.3%** | **99.2%** | **92.4%** | **0.991** | **3.1%** |
+
+*42,886 test URLs from 18,781 unseen websites. Phishing comes from the live
+Phishing.Database feed (October 2026).*
 
 ### What changed and why
 
-1. **The scheme bug is fixed.** The training URLs have no `https://`, but the browser sends
-   full URLs. v1 therefore saw characters at prediction time that it never trained on, and
-   flagged sites like google.com. v2 normalises every URL the same way for training and for
-   prediction.
-2. **De-duplication before splitting.** 42k duplicate URLs were removed *before* the
-   train/test split, so no test URL also appears in training and the scores are honest.
-3. **Richer features.** Three views of each URL are stacked together:
-   - character n-grams catch obfuscation such as `paypa1` and `-secure-`;
-   - word n-grams catch brand plus action words such as `appleid apple` and `verify account`;
-   - 25 lexical features: IP host, risky TLD, host entropy, brand in subdomain, punycode,
-     URL shorteners, a learned reputable-domain signal, and more.
-4. **Dataset-bias fix.** The Kaggle "good" URLs are mostly content pages, which made normal
-   login and inbox pages look phishy. 559 curated legitimate app pages were added to the
-   **training split only**. The sanity-check URLs use different paths, so they test
-   generalisation rather than memorisation.
-5. **Explainable by construction.** For a linear model the log-odds are exactly
-   Σ weightᵢ·valueᵢ + bias, so each feature's contribution is exact rather than an
-   approximation.
+1. **The scheme bug is fixed.** v1 trained on URLs without `https://` but scored full URLs
+   from the browser, so it flagged google.com as phishing. Every URL is now normalised the
+   same way for training and for prediction.
+2. **Richer features (450k).** Character 1-5 grams, word 1-2 grams and 25 lexical features:
+   IP host, risky TLD, host entropy, brand in subdomain, punycode, shorteners, and a learned
+   reputable-domain signal.
+3. **Threat-intelligence training.** 151k currently active phishing URLs, plus modern
+   legitimate URLs, are added to the 507k-URL Kaggle set.
+   `python training/update_threat_intel.py` refreshes the feed.
+4. **Honest evaluation.** URLs are de-duplicated before splitting, and fresh data is split by
+   website, so no site appears in both training and test.
+5. **Calibrated for real users.** Classes are re-balanced, and the decision threshold is
+   tuned on a separate validation set of unseen websites to keep false alarms at or below 2%.
+   On the test set it gives 3.1% false alarms at 99.2% precision.
+6. **Explainable by construction.** For a linear model the log-odds are exactly
+   Σ weightᵢ·valueᵢ + bias, so the popup's "Why?" box shows exact per-feature
+   contributions rather than approximations.
 
 <p align="center"><img src="docs/ai_explanation.png" width="360" alt="AI explanation in the popup"></p>
 
@@ -103,8 +102,8 @@ curl "http://localhost:5000/explain_url?url=http://appleid.apple.com.verify-sess
                                                   │
               ┌───────────────────────────────────┼───────────────────────────┐
               ▼                                   ▼                           ▼
-   LayeredPhishingDetector            URL model v2 (url_features.py)   DistilBERT email model
-   (phishing_detector.py)             LogReg on 450k features          (optional, models/email)
+   LayeredPhishingDetector            URL model v4 (url_features.py)   DistilBERT email model
+   (detector/ package)                LogReg on 450k features          (optional, models/email)
 ```
 
 ---
@@ -124,6 +123,8 @@ python api_server.py
 
 The API starts on `http://localhost:5000`. The URL model is included in the repo, so no
 training is needed.
+
+Or with Docker: `docker build -t phishing-hunter . && docker run -p 5000:5000 phishing-hunter`
 
 ### 2. Chrome extension
 
@@ -148,13 +149,15 @@ back to the pattern engine. To enable it:
 ## Retraining the URL model
 
 ```bash
-python training/train_url_model.py
+python training/update_threat_intel.py   # optional: pull the latest active-phishing feed
+python training/train_url_model.py       # about 15 min on a laptop
 ```
 
-This takes about 6 minutes on a laptop. It re-creates `models/phishing_classifier.pkl`,
-`models/tfidf_vectorizer.pkl` and `models/evaluation_results.json`, which holds the metrics,
-sanity checks and top indicators. The dataset is `training/phishing_site_urls.csv`
-(549k labelled URLs). The original v1 script is kept as `training/train.py` for reference.
+This re-creates `models/phishing_classifier.pkl`, `models/tfidf_vectorizer.pkl` and
+`models/evaluation_results.json`, which holds the Kaggle-holdout and unseen-website metrics,
+the calibrated threshold, sanity checks and top indicators. The data comes from
+`training/phishing_site_urls.csv` (549k Kaggle URLs) and `training/intel/` (see its README for
+sources and licences). The original v1 script is kept as `training/train.py` for reference.
 
 ---
 
@@ -165,8 +168,8 @@ sanity checks and top indicators. The dataset is `training/phishing_site_urls.cs
 | GET | `/check_url?url=<url>` | Quick multi-layer URL check |
 | POST | `/analyze_detailed` | Comprehensive website analysis |
 | POST | `/analyze_source` | HTML source analysis |
-| GET/POST | `/explain_url` | **v2:** explain the ML verdict for a URL |
-| GET | `/model_info` | **v2:** URL-model metrics and top indicators |
+| GET/POST | `/explain_url` | Explain the ML verdict for a URL (exact feature contributions) |
+| GET | `/model_info` | URL-model metrics, threshold and top indicators |
 | POST | `/analyze_email` | Full email analysis (AI + patterns) |
 | POST | `/check_email_quick` | Fast pattern-based email check |
 | GET | `/health` | Server health |
@@ -182,9 +185,10 @@ pip install pytest
 pytest -v
 ```
 
-The 19 tests cover URL normalisation, lexical features, legitimate and phishing URLs, the
-scheme-invariance bug fix, exact explanations, and the API endpoints including the email
-fallback. They run on every push via GitHub Actions.
+The 20 tests cover URL normalisation, lexical features, legitimate and phishing URLs, the
+scheme-invariance bug fix, threshold calibration, exact explanations, recorded fresh-data
+metrics, and the API endpoints including the email fallback. They run on every push via
+GitHub Actions.
 
 ---
 
@@ -193,16 +197,26 @@ fallback. They run on every push via GitHub Actions.
 ```
 PhishingHunter/
 ├── api_server.py              # Flask REST API
-├── phishing_detector.py       # 6-layer detection engine
+├── phishing_detector.py       # compatibility entry point (re-exports detector/)
+├── detector/                  # 6-layer detection engine, one module per layer
+│   ├── layer1_validation.py   #   allowlist + URL validation
+│   ├── layer2_features.py     #   domain / WHOIS / SSL features
+│   ├── layer3_content.py      #   page content + behaviour
+│   ├── layer4_ml.py, ml_model.py  # ML classification + model loading
+│   ├── decision.py            #   layers 5-6: ensemble + final verdict
+│   ├── pipeline.py            #   LayeredPhishingDetector
+│   └── url_heuristics.py      #   hand-crafted features + rule fallback
 ├── content_analyzer.py        # HTML/content analysis
-├── url_features.py            # v2 URL featurizer + explanations
+├── url_features.py            # URL featurizer + exact explanations
 ├── email_phishing_ml/         # email detector helpers
 ├── chrome_extension/          # Manifest V3 extension (popup, background, content script)
-├── models/                    # URL model (v2) + email tokenizer/config
+├── models/                    # URL model (v4) + email tokenizer/config
 ├── training/
-│   ├── train_url_model.py     # v2 training pipeline
+│   ├── train_url_model.py     # v4 training + fresh-data evaluation
+│   ├── update_threat_intel.py # refresh the active-phishing feed
 │   ├── train.py               # v1 pipeline (reference)
-│   └── phishing_site_urls.csv # dataset (549k URLs)
+│   ├── intel/                 # threat intel: 150k active phishing + legit URLs
+│   └── phishing_site_urls.csv # Kaggle dataset (549k URLs)
 ├── tests/                     # pytest suite
 └── docs/
 ```
