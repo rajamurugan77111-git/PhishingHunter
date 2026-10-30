@@ -1900,19 +1900,22 @@ if __name__ == '__main__':
     
     try:
         # Update server configuration
+        # Debug mode exposes the Werkzeug debugger (remote code execution if the
+        # port is reachable), so it is opt-in via PH_DEBUG=1 for local development.
+        debug = os.environ.get('PH_DEBUG', '0') == '1'
         app.run(
-            host='127.0.0.1',
-            port=5000,
-            debug=True,  # Enable debug mode for development
+            host=os.environ.get('PH_HOST', '127.0.0.1'),
+            port=int(os.environ.get('PH_PORT', '5000')),
+            debug=debug,
             threaded=True,
-            use_reloader=True
+            use_reloader=debug
         )
     except Exception as e:
         print(f"❌ Error starting server: {e}")
         print("Trying alternative configuration...")
         try:
             # Fall back to a simpler configuration
-            app.run(host='127.0.0.1', port=5000)
+            app.run(host=os.environ.get('PH_HOST', '127.0.0.1'), port=int(os.environ.get('PH_PORT', '5000')))
         except Exception as e2:
             print(f"❌ Failed to start server with alternative configuration: {e2}")
             sys.exit(1)
