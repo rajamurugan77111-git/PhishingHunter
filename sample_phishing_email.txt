@@ -1,0 +1,52 @@
+SAMPLE PHISHING EMAIL FOR TESTING
+==================================
+
+Subject: URGENT: Your Account Will Be Suspended - Verify Now
+
+From: security@gmail-verification.com
+
+Email Content:
+--------------
+
+Dear User,
+
+We have detected unusual activity on your Gmail account. Your account will be suspended within 24 hours unless you verify your identity immediately.
+
+URGENT ACTION REQUIRED:
+
+To prevent suspension, please verify your account by clicking the link below:
+
+🔗 Verify Account Now: https://gmail-secure-verification.tk/verify?id=abc123
+
+If you don't verify within 24 hours, your account will be permanently deleted and all emails will be lost.
+
+This is an automated security message. Do not reply to this email.
+
+Best regards,
+Gmail Security Team
+support@gmail-verification.com
+
+---
+
+PHISHING INDICATORS IN THIS EMAIL:
+==================================
+
+1. 🚨 SUSPICIOUS DOMAIN: gmail-verification.com (not gmail.com)
+2. ⚠️ URGENT LANGUAGE: "within 24 hours", "immediately"
+3. 🔗 SUSPICIOUS LINK: .tk domain (free/suspicious TLD)
+4. 😰 FEAR TACTICS: "permanently deleted", "all emails lost"
+5. 📧 FAKE SENDER: Impersonating Gmail security
+6. ⏰ TIME PRESSURE: Creating false urgency
+7. 🎣 CALL TO ACTION: Demanding immediate link clicking
+
+TESTING INSTRUCTIONS:
+====================
+
+1. Send this content to your own email account
+2. Open the email in Gmail
+3. Use your extension to analyze it
+4. The extension should detect multiple threat indicators
+5. Expected risk score: HIGH (70%+ phishing risk)
+
+⚠️ IMPORTANT: This is for testing only! 
+Never click suspicious links in real emails!

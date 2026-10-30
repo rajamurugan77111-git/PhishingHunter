@@ -1,0 +1,5 @@
+# Optional: DistilBERT email classifier (needs the model in models/email/, see README)
+-r requirements.txt
+torch>=2.1
+transformers>=4.40
+tokenizers>=0.15

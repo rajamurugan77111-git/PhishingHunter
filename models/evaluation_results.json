@@ -1,0 +1,295 @@
+{
+  "accuracy": 0.9856,
+  "precision": 0.9823,
+  "recall": 0.9534,
+  "f1": 0.9677,
+  "roc_auc": 0.9975,
+  "confusion_matrix": [
+    [
+      78188,
+      392
+    ],
+    [
+      1065,
+      21792
+    ]
+  ],
+  "model_type": "LogisticRegression",
+  "model_version": "2.0",
+  "features": "URLFeaturizer: char 1-5 grams + word 1-2 grams + 25 lexical features",
+  "n_features": 450025,
+  "sklearn_version": "1.8.0",
+  "training_timestamp": "2026-10-30T07:04:40.372532+00:00",
+  "dataset": {
+    "raw_rows": 549346,
+    "unique_urls": 507184,
+    "train_rows": 406306,
+    "test_rows": 101437,
+    "augmented_legitimate_urls": 559,
+    "split": "stratified 80/20 after de-duplication, seed 42"
+  },
+  "sanity_checks": [
+    {
+      "url": "https://www.google.com/",
+      "expected": "legitimate",
+      "phishing_probability": 0.001,
+      "correct": true
+    },
+    {
+      "url": "https://github.com/login/oauth/authorize?client_id=abc123",
+      "expected": "legitimate",
+      "phishing_probability": 0.19,
+      "correct": true
+    },
+    {
+      "url": "https://www.wikipedia.org/",
+      "expected": "legitimate",
+      "phishing_probability": 0.0,
+      "correct": true
+    },
+    {
+      "url": "https://mail.google.com/mail/u/1/#sent",
+      "expected": "legitimate",
+      "phishing_probability": 0.066,
+      "correct": true
+    },
+    {
+      "url": "https://outlook.live.com/mail/0/",
+      "expected": "legitimate",
+      "phishing_probability": 0.089,
+      "correct": true
+    },
+    {
+      "url": "https://www.linkedin.com/checkpoint/lg/sign-in",
+      "expected": "legitimate",
+      "phishing_probability": 0.008,
+      "correct": true
+    },
+    {
+      "url": "https://www.amazon.in/gp/cart/view.html",
+      "expected": "legitimate",
+      "phishing_probability": 0.0,
+      "correct": true
+    },
+    {
+      "url": "https://stackoverflow.com/questions",
+      "expected": "legitimate",
+      "phishing_probability": 0.001,
+      "correct": true
+    },
+    {
+      "url": "https://www.kongu.ac.in/",
+      "expected": "legitimate",
+      "phishing_probability": 0.015,
+      "correct": true
+    },
+    {
+      "url": "https://docs.python.org/3/library/",
+      "expected": "legitimate",
+      "phishing_probability": 0.0,
+      "correct": true
+    },
+    {
+      "url": "http://paypal-secure-login.verify-account.tk/webscr?cmd=_login",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    },
+    {
+      "url": "http://192.168.4.20/bank/login.php",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    },
+    {
+      "url": "http://appleid.apple.com.verify-session.xyz/signin",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    },
+    {
+      "url": "http://secure-update-account.netflix.billing-support.ml/",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    },
+    {
+      "url": "http://github.com.login-session.top/verify",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    },
+    {
+      "url": "http://mail-google.com-security.xyz/mail/u/0/",
+      "expected": "phishing",
+      "phishing_probability": 1.0,
+      "correct": true
+    }
+  ],
+  "top_phishing_indicators": [
+    {
+      "feature": "char:q",
+      "weight": 14.45
+    },
+    {
+      "feature": "char:x",
+      "weight": 13.233
+    },
+    {
+      "feature": "lex:suspicious_words",
+      "weight": 13.087
+    },
+    {
+      "feature": "lex:host_length",
+      "weight": 12.44
+    },
+    {
+      "feature": "char:z",
+      "weight": 12.099
+    },
+    {
+      "feature": "lex:n_hyphens_host",
+      "weight": 10.706
+    },
+    {
+      "feature": "word:exe",
+      "weight": 10.463
+    },
+    {
+      "feature": "char:/.",
+      "weight": 10.34
+    },
+    {
+      "feature": "char:j",
+      "weight": 10.105
+    },
+    {
+      "feature": "char:v",
+      "weight": 10.055
+    },
+    {
+      "feature": "word:js",
+      "weight": 9.996
+    },
+    {
+      "feature": "char:/i",
+      "weight": 9.791
+    },
+    {
+      "feature": "char:p",
+      "weight": 9.601
+    },
+    {
+      "feature": "lex:n_digits_ratio",
+      "weight": 8.712
+    },
+    {
+      "feature": "char:/u",
+      "weight": 8.582
+    },
+    {
+      "feature": "char:/w",
+      "weight": 8.493
+    },
+    {
+      "feature": "char:g",
+      "weight": 8.483
+    },
+    {
+      "feature": "char:f",
+      "weight": 8.306
+    },
+    {
+      "feature": "char: ",
+      "weight": 8.219
+    },
+    {
+      "feature": "char:b",
+      "weight": 8.186
+    }
+  ],
+  "top_legitimate_indicators": [
+    {
+      "feature": "char:-",
+      "weight": -14.627
+    },
+    {
+      "feature": "char:.com/",
+      "weight": -14.606
+    },
+    {
+      "feature": "char:com/",
+      "weight": -14.509
+    },
+    {
+      "feature": "char:om/",
+      "weight": -14.433
+    },
+    {
+      "feature": "char:/",
+      "weight": -14.042
+    },
+    {
+      "feature": "char:_",
+      "weight": -13.621
+    },
+    {
+      "feature": "char:m/",
+      "weight": -13.376
+    },
+    {
+      "feature": "char:+",
+      "weight": -12.6
+    },
+    {
+      "feature": "char:=",
+      "weight": -8.669
+    },
+    {
+      "feature": "char:00",
+      "weight": -7.646
+    },
+    {
+      "feature": "lex:n_dots_host",
+      "weight": -7.225
+    },
+    {
+      "feature": "char:19",
+      "weight": -7.211
+    },
+    {
+      "feature": "word:cfm",
+      "weight": -7.148
+    },
+    {
+      "feature": "char:200",
+      "weight": -7.101
+    },
+    {
+      "feature": "word:www angelfire",
+      "weight": -7.028
+    },
+    {
+      "feature": "char:htm",
+      "weight": -7.022
+    },
+    {
+      "feature": "lex:reputable_domain",
+      "weight": -6.613
+    },
+    {
+      "feature": "char:.php?",
+      "weight": -6.293
+    },
+    {
+      "feature": "char:ww",
+      "weight": -6.229
+    },
+    {
+      "feature": "char:qu",
+      "weight": -6.121
+    }
+  ],
+  "compatible": true,
+  "train_seconds": 535.1
+}

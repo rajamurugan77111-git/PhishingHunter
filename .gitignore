@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+*.backup
+
+# Large model weights (GitHub rejects files > 100 MB).
+# The 268 MB DistilBERT email model is distributed separately - see README.
+models/email/*.safetensors
+models/email/*.bin
+
+# The URL model (models/*.pkl, ~8 MB) and the training CSV (~31 MB) ARE committed
+# so the project works right after cloning.
+
+# Runtime / feedback data
+feedback_data/
+*.db
+.pytest_cache/
+
+# Chrome extension package
+chrome_extension.zip
+
+# Runtime feedback written by the API
+data/

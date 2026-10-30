@@ -1,0 +1,87 @@
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   User visits   │    │   Content Script │    │  Background.js  │
+│    website      │───▶│   analyzes DOM   │───▶│   monitors &    │
+│                 │    │   & patterns     │    │   notifies      │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Popup UI      │◄──▶│   API Server     │◄──▶│ Phishing        │
+│   (user ctrl)   │    │   (Flask)        │    │ Detector        │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   User          │    │   Content        │    │   ML Models     │
+│   Feedback      │    │   Analyzer       │    │   (.pkl files)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                                        ▲
+                                                                                                                 │
+                                               ┌─────────────────┐
+                                               │  Training       │
+                                               │  Pipeline       │
+                                               └─────────────────┘
+
+Layer 1: Basic Validation
+*Purpose*: URL format and structure validation
+*Features*:
+- Malformed URL detection
+- Suspicious protocol analysis
+- Basic pattern matching
+- Domain extraction and validation
+
+*Weight*: 1.0x
+
+### Layer 2: Feature Analysis  
+*Purpose*: Advanced domain and URL feature extraction
+*Features*:
+- Domain age analysis (via WHOIS)
+- Subdomain count and patterns
+- URL length and complexity
+- Special character analysis
+- Top-level domain categorization
+- Suspicious keyword detection
+
+*Weight*: 1.2x
+
+### Layer 3: Content Analysis
+*Purpose*: Real-time HTML/JavaScript analysis
+*Features*:
+- HTML structure analysis
+- JavaScript obfuscation detection
+- Form behavior analysis
+- External resource loading
+- SSL certificate validation
+- Social engineering pattern detection
+
+*Weight*: 1.3x
+
+### Layer 4: ML Classification
+*Purpose*: Machine learning-based prediction
+*Features*:
+- TF-IDF character n-gram analysis
+- RandomForest/XGBoost ensemble
+- GPU-accelerated inference
+- Confidence scoring
+- Feature importance analysis
+
+*Weight*: 1.5x (Enhanced importance)
+
+### Layer 5: Ensemble Decision
+*Purpose*: Weighted combination of all analyses
+*Features*:
+- Conflict resolution between layers
+- Confidence weighting
+- Consensus building
+- Dynamic threshold adjustment
+
+*Weight*: 1.0x
+
+### Layer 6: Final Verdict
+*Purpose*: Risk assessment and user recommendations
+*Risk Levels*:
+- 🟢 *SAFE* (<15%): Proceed normally
+- 🟡 *LOW* (15-35%): Minor concerns
+- 🟠 *MEDIUM* (35-60%): Exercise caution  
+- 🔴 *HIGH* (60-75%): Dangerous, avoid
+- 🚨 *CRITICAL* (>75%): Immediate threat

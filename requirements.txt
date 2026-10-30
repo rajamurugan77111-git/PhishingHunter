@@ -1,0 +1,18 @@
+# Core API + URL detection
+flask>=3.0,<4
+flask-cors>=4.0
+flask-limiter>=3.5
+requests>=2.31
+beautifulsoup4>=4.12
+tldextract>=5.1
+python-whois>=0.9
+dnspython>=2.4
+validators>=0.22
+tld>=0.13
+cryptography>=41
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+# Model files are pickled with this version - keep it pinned so they load cleanly.
+scikit-learn==1.8.0
+joblib>=1.3
