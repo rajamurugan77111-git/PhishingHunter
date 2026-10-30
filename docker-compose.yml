@@ -1,0 +1,16 @@
+# Production:  cp .env.example .env  (set PH_API_KEY)  &&  docker compose up -d --build
+services:
+  phishing-hunter:
+    build: .
+    ports:
+      - "127.0.0.1:5000:5000"   # the extension talks to localhost:5000
+    env_file:
+      - .env
+    environment:
+      - PH_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

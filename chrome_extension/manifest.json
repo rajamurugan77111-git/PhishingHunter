@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Enhanced Phishing Hunter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "AI-powered, multi-layer phishing detection with ensemble ML, visual analysis, and threat intelligence.",
   "permissions": [
     "activeTab",

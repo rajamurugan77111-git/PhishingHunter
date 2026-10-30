@@ -1,3 +1,4 @@
+import './api_auth.js';
 // Simplified background script for stable service worker operation
 console.log('Layered Phishing Detector background script loaded');
 

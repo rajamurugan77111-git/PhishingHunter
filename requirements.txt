@@ -16,3 +16,4 @@ scipy>=1.11
 # Model files are pickled with this version - keep it pinned so they load cleanly.
 scikit-learn==1.8.0
 joblib>=1.3
+waitress>=3.0

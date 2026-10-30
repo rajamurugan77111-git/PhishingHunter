@@ -124,7 +124,18 @@ python api_server.py
 The API starts on `http://localhost:5000`. The URL model is included in the repo, so no
 training is needed.
 
-Or with Docker: `docker build -t phishing-hunter . && docker run -p 5000:5000 phishing-hunter`
+Or with Docker: `cp .env.example .env` (set `PH_API_KEY`), then `docker compose up -d --build`.
+
+### Production security
+
+| Setting | Purpose |
+|---|---|
+| `PH_API_KEY` | Required on every endpoint except `/health`. Paste the same key into the extension under **Settings → API server key** |
+| `PH_ADMIN_KEY` | Separate key for the admin endpoints `/retrain_model` and `/learning_stats` |
+| `PH_DEBUG=0` | The debug console stays off (default), because it allows remote code execution |
+
+The server runs on **waitress**, a production WSGI server, and is rate-limited to 100
+requests/min per client. Keys are compared in constant time.
 
 ### 2. Chrome extension
 
@@ -185,7 +196,7 @@ pip install pytest
 pytest -v
 ```
 
-The 20 tests cover URL normalisation, lexical features, legitimate and phishing URLs, the
+The 25 tests cover API-key and admin-key enforcement, and URL normalisation, lexical features, legitimate and phishing URLs, the
 scheme-invariance bug fix, threshold calibration, exact explanations, recorded fresh-data
 metrics, and the API endpoints including the email fallback. They run on every push via
 GitHub Actions.
@@ -209,7 +220,8 @@ PhishingHunter/
 ├── content_analyzer.py        # HTML/content analysis
 ├── url_features.py            # URL featurizer + exact explanations
 ├── email_phishing_ml/         # email detector helpers
-├── chrome_extension/          # Manifest V3 extension (popup, background, content script)
+├── chrome_extension/          # Manifest V3 extension (popup, background, content script,
+│                              #   api_auth.js adds the API key to server requests)
 ├── models/                    # URL model (v4) + email tokenizer/config
 ├── training/
 │   ├── train_url_model.py     # v4 training + fresh-data evaluation

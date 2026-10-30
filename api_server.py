@@ -83,7 +83,24 @@ except ImportError as e:
     EMAIL_ANALYSIS_AVAILABLE = False
 
 # Security Configuration
-API_KEY = os.environ.get("PHISHING_API_KEY", "dev-phishing-detector-2025")
+# API keys (set in the environment or .env). Empty = open access for single-user local use.
+#   PH_API_KEY   - required on every endpoint except /health (sent by the extension)
+#   PH_ADMIN_KEY - additionally required for admin endpoints (retraining, learning stats)
+def _load_dotenv():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if os.path.exists(path):
+        for line in open(path, encoding='utf-8'):
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, v = line.split('=', 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+_load_dotenv()
+API_KEY = os.environ.get("PH_API_KEY") or os.environ.get("PHISHING_API_KEY", "")
+ADMIN_KEY = os.environ.get("PH_ADMIN_KEY", "")
+PUBLIC_PATHS = {"/health"}
+ADMIN_PATHS = {"/retrain_model", "/learning_stats"}
 TRUSTED_ORIGINS = [
     "chrome-extension://*",  # Allow any Chrome extension (can be further restricted)
     "http://localhost:3000",
@@ -116,20 +133,27 @@ def is_valid_url(url):
     
     return True
 
-# API Key authentication decorator
-def require_api_key(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        # For development, allow requests without API key from localhost
-        if request.remote_addr in ['127.0.0.1', 'localhost']:
-            return f(*args, **kwargs)
-        
-        key = request.headers.get('X-API-KEY') or request.args.get('api_key')
-        if key != API_KEY:
-            logger.warning(f"Unauthorized API access attempt from {request.remote_addr}")
-            return jsonify({'error': 'Unauthorized - Invalid API key'}), 401
-        return f(*args, **kwargs)
-    return decorated
+# API key authentication (applied to every request in a before_request hook below)
+def _key_matches(provided, expected):
+    import hmac
+    return bool(expected) and hmac.compare_digest((provided or "").encode(), expected.encode())
+
+
+def check_api_key():
+    """Return an error response if the request is not authorised, else None."""
+    if request.method == 'OPTIONS' or request.path in PUBLIC_PATHS:
+        return None
+    provided = request.headers.get('X-API-Key', '')
+    if request.path in ADMIN_PATHS and ADMIN_KEY:
+        if not _key_matches(provided, ADMIN_KEY):
+            logger.warning(f"Admin endpoint denied for {request.remote_addr} on {request.path}")
+            return jsonify({'error': 'Admin API key required'}), 403
+        return None
+    if API_KEY and not (_key_matches(provided, API_KEY) or _key_matches(provided, ADMIN_KEY)):
+        logger.warning(f"Unauthorized API access attempt from {request.remote_addr} on {request.path}")
+        return jsonify({'error': 'Unauthorized - missing or invalid X-API-Key'}), 401
+    return None
+
 
 # Update CORS configuration to be more secure
 app = Flask(__name__)
@@ -146,10 +170,15 @@ CORS(app, resources={
     r"/*": {
         "origins": TRUSTED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-API-KEY"],
+        "allow_headers": ["Content-Type", "Authorization", "X-API-Key"],
         "supports_credentials": False  # Disable credentials for security
     }
 })
+
+@app.before_request
+def _enforce_api_key():
+    return check_api_key()
+
 
 # Initialize the detector globally with retry mechanism
 detector = None
@@ -1903,13 +1932,19 @@ if __name__ == '__main__':
         # Debug mode exposes the Werkzeug debugger (remote code execution if the
         # port is reachable), so it is opt-in via PH_DEBUG=1 for local development.
         debug = os.environ.get('PH_DEBUG', '0') == '1'
-        app.run(
-            host=os.environ.get('PH_HOST', '127.0.0.1'),
-            port=int(os.environ.get('PH_PORT', '5000')),
-            debug=debug,
-            threaded=True,
-            use_reloader=debug
-        )
+        host = os.environ.get('PH_HOST', '127.0.0.1')
+        port = int(os.environ.get('PH_PORT', '5000'))
+        print(f"   - API key: {'required' if API_KEY else 'NOT SET (open local mode)'}; "
+              f"admin key: {'set' if ADMIN_KEY else 'not set'}")
+        if debug:
+            app.run(host=host, port=port, debug=True, threaded=True, use_reloader=True)
+        else:
+            try:
+                from waitress import serve
+                print(f"   - Production server (waitress) on http://{host}:{port}")
+                serve(app, host=host, port=port, threads=8, ident="PhishingHunter")
+            except ImportError:
+                app.run(host=host, port=port, threaded=True)
     except Exception as e:
         print(f"❌ Error starting server: {e}")
         print("Trying alternative configuration...")

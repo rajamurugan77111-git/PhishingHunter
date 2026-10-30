@@ -65,3 +65,4 @@ chrome_extension.zip
 
 # Runtime feedback written by the API
 data/
+.env
